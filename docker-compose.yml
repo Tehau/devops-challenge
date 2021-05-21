@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres
+    container_name: db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=mystuff
+      - POSTGRES_PASSWORD=mystuff
+      - POSTGRES_DB=mystuff
+    volumes:
+    - database-data:/var/lib/postgresql/data/
+  backend:
+    container_name: backend
+    build:
+      context: api
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mystuff
+      - SPRING_DATASOURCE_USERNAME=mystuff
+      - SPRING_DATASOURCE_PASSWORD=mystuff
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - "8080:8080"
+    links:
+      - postgres
+  frontend:
+    container_name: front
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    links:
+      - backend
+volumes:
+  database-data:
